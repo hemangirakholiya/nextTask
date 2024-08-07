@@ -11,6 +11,8 @@ import { Modal, Button } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
+import Sidebar from './sidebar';
+import Navbar from './Navbar';
 
 interface Product {
     id: number;
@@ -71,23 +73,33 @@ const columns = [
     }),
 ]
 
+const WebPage = styled.div`
+    display:flex;
+`
+const Product = styled.div`
+    margin-left:300px;
+`
+
 const Container = styled.div`
     padding: 1rem;
 `
 
 const StyledTable = styled.table`
     width: 100%;
-    tbody tr:nth-child(odd){
+    margin:auto;
+    box-shadow:0px 3px 4px 0px rgba(0, 0, 0, 0.03);
+    background-color:#fff;
+    border-radius:10px;
+    border-collapse: collapse;
+    thead{
+        background-color:rgba(0, 0, 0, .05)
+    }
+    tbody tr:hover{
         background-color:rgba(0, 0, 0, .05)  
     }
     td,th{    
         border-top: 1px solid #dee2e6;
-    }
-`
-
-const Caption = styled.caption`
-    font-size: 1.5rem;
-    margin-bottom: 1.25rem;
+    }     
 `
 
 const Th = styled.th`
@@ -101,15 +113,12 @@ const Td = styled.td`
 
 const ViewButton = styled.button`
     padding: 0.5rem 1rem;
-    background-color: #007bff;
+    background-color: #e9b102;
     color: white;
     border: none;
     cursor: pointer;
-    font-size:12px;
-    &:hover {
-        background-color: #0056b3;
-    }
-    border-radius: 10px;    
+    font-size:12px;   
+    border-radius: 5px;    
 `
 
 const PaginationContainer = styled.div`
@@ -121,9 +130,9 @@ const PaginationContainer = styled.div`
 const PaginationButton = styled.button`
     margin: 0 0.25rem;
     padding: 0.5rem 1rem;
-    background-color: ${props => props.disabled ? '#007bff' : 'transparent'};
+    background-color: ${props => props.disabled ? '#e9b102' : 'transparent'};
     color: ${props => props.disabled ? '#fff' : '#000'};
-    border: 1px solid #007bff;
+    border: 1px solid #e9b102;
     cursor: ${props => props.disabled ? 'not-allowed' : 'pointer'};
     border-radius:5px;   
 `
@@ -132,7 +141,7 @@ const PaginationButtons = styled.button`
     padding: 0.5rem 0.5rem;
     background-color: transparent;
     border:none;
-    border: 1px solid #007bff;
+    border: 1px solid #e9b102;
     cursor: ${props => props.disabled ? 'not-allowed' : 'pointer'};
     border-radius:5px;
 `
@@ -166,7 +175,7 @@ const ReviewsSection = styled.div`
 `
 const Table = styled.table`
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: collapse;  
 `;
 
 const TableHeader = styled.th`
@@ -184,18 +193,14 @@ const TableCell = styled.td`
 const CloseButton = styled(Button)`
     min-width:30px;
     min-height:30px;
-    background-color: #007bff;
+    background-color: #e9b102;
     color: white;
     position:absolute;
     top:10px;
     right:10px;
     border-radius:50%;
-    padding:0;
-    &:hover {
-        background-color: #0056b3;
-    }
+    padding:0;   
 `
-
 
 interface ProductsTableProps {
     products: Product[];
@@ -209,7 +214,7 @@ const ProductsTable = ({ products }: ProductsTableProps) => {
     const [data, setData] = useState<Product[]>(products);
     console.log("Data state:", data);
     const [currentPage, setCurrentPage] = useState(1)
-    const [rowsPerPage, setRowsPerPage] = useState(10)
+    const [rowsPerPage, setRowsPerPage] = useState(8)
     const rerender = useReducer(() => ({}), {})[1]
 
     // useEffect(() => {
@@ -247,94 +252,97 @@ const ProductsTable = ({ products }: ProductsTableProps) => {
     const handleClose = () => setOpen(false);
 
     return (
-        <div>
-            <Container>
-                <StyledTable>
-                    <Caption>Products Table</Caption>
-                    <thead>
-                        {table.getHeaderGroups().map(headerGroup => (
-                            <tr key={headerGroup.id}>
-                                {headerGroup.headers.map(header => (
-                                    <Th key={header.id}>
-                                        {header.isPlaceholder
-                                            ? null
-                                            : flexRender(
-                                                header.column.columnDef.header,
-                                                header.getContext()
-                                            )}
-                                    </Th>
-                                ))}
-                                <Th style={{ width: '150px' }}></Th>
-                            </tr>
+        <WebPage>
+            <Sidebar />
+            <Product>
+                <Navbar />
+                <Container>
+                    <StyledTable>
+                        <thead>
+                            {table.getHeaderGroups().map(headerGroup => (
+                                <tr key={headerGroup.id}>
+                                    {headerGroup.headers.map(header => (
+                                        <Th key={header.id}>
+                                            {header.isPlaceholder
+                                                ? null
+                                                : flexRender(
+                                                    header.column.columnDef.header,
+                                                    header.getContext()
+                                                )}
+                                        </Th>
+                                    ))}
+                                    <Th style={{ width: '150px' }}>Action</Th>
+                                </tr>
+                            ))}
+                        </thead>
+                        <tbody>
+                            {paginatedData?.map((row, index) => (
+                                <tr key={index}>
+                                    {table.getRowModel().rows.map((tableRow) => (
+                                        tableRow.original.id === row.id && tableRow.getVisibleCells().map(cell => (
+                                            <Td key={cell.id}>
+                                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                            </Td>
+                                        ))
+                                    ))}
+                                    <Td><ViewButton onClick={() => handleOpen(row.id)}>View Review</ViewButton></Td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </StyledTable>
+                    <PaginationContainer>
+                        <PaginationButtons onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
+                            <KeyboardArrowLeftIcon />
+                        </PaginationButtons>
+                        {Array.from({ length: totalPages }, (_, i) => (
+                            <PaginationButton key={i + 1} onClick={() => handlePageChange(i + 1)} disabled={currentPage === i + 1}>
+                                {i + 1}
+                            </PaginationButton>
                         ))}
-                    </thead>
-                    <tbody>
-                        {paginatedData?.map((row, index) => (
-                            <tr key={index}>
-                                {table.getRowModel().rows.map((tableRow) => (
-                                    tableRow.original.id === row.id && tableRow.getVisibleCells().map(cell => (
-                                        <Td key={cell.id}>
-                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                        </Td>
-                                    ))
-                                ))}
-                                <Td><ViewButton onClick={() => handleOpen(row.id)}>View Review</ViewButton></Td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </StyledTable>
-                <PaginationContainer>
-                    <PaginationButtons onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
-                        <KeyboardArrowLeftIcon />
-                    </PaginationButtons>
-                    {Array.from({ length: totalPages }, (_, i) => (
-                        <PaginationButton key={i + 1} onClick={() => handlePageChange(i + 1)} disabled={currentPage === i + 1}>
-                            {i + 1}
-                        </PaginationButton>
-                    ))}
-                    <PaginationButtons onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}>
-                        <KeyboardArrowRightIcon />
-                    </PaginationButtons>
-                </PaginationContainer>
-            </Container>
+                        <PaginationButtons onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}>
+                            <KeyboardArrowRightIcon />
+                        </PaginationButtons>
+                    </PaginationContainer>
+                </Container>
 
-            <Modal open={open} onClose={handleClose}>
-                <ModalContent>
-                    <ModalBox>
-                        {selectedProduct && (
-                            <>
-                                <ReviewsSection>
-                                    <h3>Reviews</h3>
-                                    <Table>
-                                        <thead>
-                                            <tr>
-                                                <TableHeader>Rating</TableHeader>
-                                                <TableHeader>Comment</TableHeader>
-                                                <TableHeader>Date</TableHeader>
-                                                <TableHeader>Reviewer Email</TableHeader>
-                                                <TableHeader>Reviewer Name</TableHeader>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {selectedProduct.reviews.map((review, index) => (
-                                                <tr key={index}>
-                                                    <TableCell>{review.rating} stars</TableCell>
-                                                    <TableCell>{review.comment}</TableCell>
-                                                    <TableCell>{new Date(review.date).toLocaleDateString()}</TableCell>
-                                                    <TableCell>{review.reviewerEmail}</TableCell>
-                                                    <TableCell>{review.reviewerName}</TableCell>
+                <Modal open={open} onClose={handleClose}>
+                    <ModalContent>
+                        <ModalBox>
+                            {selectedProduct && (
+                                <>
+                                    <ReviewsSection>
+                                        <h3>Reviews</h3>
+                                        <Table>
+                                            <thead>
+                                                <tr>
+                                                    <TableHeader>Rating</TableHeader>
+                                                    <TableHeader>Comment</TableHeader>
+                                                    <TableHeader>Date</TableHeader>
+                                                    <TableHeader>Reviewer Email</TableHeader>
+                                                    <TableHeader>Reviewer Name</TableHeader>
                                                 </tr>
-                                            ))}
-                                        </tbody>
-                                    </Table>
-                                </ReviewsSection>
-                                <CloseButton onClick={handleClose}><CloseIcon /></CloseButton>
-                            </>
-                        )}
-                    </ModalBox>
-                </ModalContent>
-            </Modal>
-        </div>
+                                            </thead>
+                                            <tbody>
+                                                {selectedProduct.reviews.map((review, index) => (
+                                                    <tr key={index}>
+                                                        <TableCell>{review.rating} stars</TableCell>
+                                                        <TableCell>{review.comment}</TableCell>
+                                                        <TableCell>{new Date(review.date).toLocaleDateString()}</TableCell>
+                                                        <TableCell>{review.reviewerEmail}</TableCell>
+                                                        <TableCell>{review.reviewerName}</TableCell>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </Table>
+                                    </ReviewsSection>
+                                    <CloseButton onClick={handleClose}><CloseIcon /></CloseButton>
+                                </>
+                            )}
+                        </ModalBox>
+                    </ModalContent>
+                </Modal>
+            </Product>
+        </WebPage>
     );
 };
 

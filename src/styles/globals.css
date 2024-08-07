@@ -1,3 +1,9 @@
+*{
+  box-sizing: border-box;
+}
+
 body{
   font-family: calibri;
+  margin: 0;
+  background-color: #f9f7f7;
 }
